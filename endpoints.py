@@ -3,7 +3,7 @@ from flask import Flask, Blueprint, jsonify, render_template, request, abort
 from settings import UPLOADED_FILES, MAX_SiZE
 from http import HTTPStatus
 
-from helpers import allowed_file
+from helpers import not_allowed_file_ext, get_file_hash
 
 
 app = Flask(__name__)
@@ -39,8 +39,10 @@ def get_files_with_specified_extension(ext):
 def create_file():
     if request.method == 'POST':
         up_files = request.files.getlist('file')
+        if not up_files or all(file.filename == '' for file in up_files):
+            return abort(HTTPStatus.BAD_REQUEST, description='no file selected')
         for file in up_files:
-            if file and allowed_file(file.filename):
+            if file and not_allowed_file_ext(file.filename):
                 filename = file.filename
                 up_path = os.path.join(UPLOADED_FILES, filename)
                 file.save(up_path)
