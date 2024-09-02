@@ -45,6 +45,7 @@ def create_file():
         for file in up_files:
             if file and not_allowed_file_ext(file.filename):
                 file_hash = hashlib.md5(file.read()).hexdigest()
+                file.seek(0)
                 if file_hash not in get_file_hash(UPLOADED_FILES):
                     filename = file.filename
                     up_path = os.path.join(UPLOADED_FILES, filename)
