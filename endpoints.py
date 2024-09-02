@@ -47,8 +47,7 @@ def create_file():
                 file_hash = hashlib.md5(file.read()).hexdigest()
                 file.seek(0)
                 if file_hash not in get_file_hash(UPLOADED_FILES):
-                    filename = file.filename
-                    up_path = os.path.join(UPLOADED_FILES, filename)
+                    up_path = os.path.join(UPLOADED_FILES, file.filename)
                     file.save(up_path)
             else:
                 return abort(HTTPStatus.BAD_REQUEST, description='invalid file type')
