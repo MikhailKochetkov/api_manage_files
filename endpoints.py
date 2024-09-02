@@ -19,23 +19,6 @@ def show_upload_page():
     return render_template('upload_form.html')
 
 
-@route_prefix.route('/list', methods=['GET'])
-def get_files():
-    try:
-        files = os.listdir(UPLOADED_FILES)
-    except FileNotFoundError:
-        return jsonify({'error': 'directory not found'})
-    return jsonify(files)
-
-
-@route_prefix.route('/<ext>', methods=['GET'])
-def get_files_with_specified_extension(ext):
-    files = [f for f in os.listdir(UPLOADED_FILES) if f.endswith(ext)]
-    if not files:
-        return jsonify({'error': 'files not found'})
-    return jsonify(files)
-
-
 @route_prefix.route('/create', methods=['POST'])
 def create_file():
     if request.method == 'POST':
@@ -48,10 +31,40 @@ def create_file():
                 file.seek(0)
                 if file_hash not in get_file_hash(UPLOADED_FILES):
                     up_path = os.path.join(UPLOADED_FILES, file.filename)
-                    file.save(up_path)
+                    try:
+                        file.save(up_path)
+                    except Exception as e:
+                        return abort(
+                            HTTPStatus.INTERNAL_SERVER_ERROR,
+                            description=f'error saving file: {str(e)}')
+                else:
+                    return abort(HTTPStatus.BAD_REQUEST, description='file already exists')
             else:
                 return abort(HTTPStatus.BAD_REQUEST, description='invalid file type')
         return render_template('success.html')
+
+
+@route_prefix.route('/list', methods=['GET'])
+def get_files():
+    try:
+        files = os.listdir(UPLOADED_FILES)
+    except FileNotFoundError:
+        return jsonify({'error': 'directory not found'})
+    return jsonify(files)
+
+
+@route_prefix.route('/<ext>/<file_name>', methods=['GET'])
+def get_file(ext, file_name):
+    file = [f for f in os.listdir(UPLOADED_FILES) if f.startswith(file_name) and f.endswith(ext)]
+    return jsonify(file)
+
+
+@route_prefix.route('/<ext>', methods=['GET'])
+def get_files_with_specified_extension(ext):
+    files = [f for f in os.listdir(UPLOADED_FILES) if f.endswith(ext)]
+    if not files:
+        return jsonify({'error': 'files not found'})
+    return jsonify(files)
 
 
 @route_prefix.route('/<file_name>', methods=['DELETE'])
@@ -62,12 +75,6 @@ def delete_file(file_name):
         return jsonify({"message": f"file '{file_name}' deleted successfully"})
     else:
         return jsonify({"error": f"file '{file_name}' not found"}), HTTPStatus.NOT_FOUND
-
-
-@route_prefix.route('/<ext>/<file_name>', methods=['GET'])
-def get_file(ext, file_name):
-    file = [f for f in os.listdir(UPLOADED_FILES) if f.startswith(file_name) and f.endswith(ext)]
-    return jsonify(file)
 
 
 app.register_blueprint(route_prefix)
