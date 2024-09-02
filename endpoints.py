@@ -1,4 +1,5 @@
 import os
+import hashlib
 from flask import Flask, Blueprint, jsonify, render_template, request, abort
 from settings import UPLOADED_FILES, MAX_SiZE
 from http import HTTPStatus
@@ -43,9 +44,11 @@ def create_file():
             return abort(HTTPStatus.BAD_REQUEST, description='no file selected')
         for file in up_files:
             if file and not_allowed_file_ext(file.filename):
-                filename = file.filename
-                up_path = os.path.join(UPLOADED_FILES, filename)
-                file.save(up_path)
+                file_hash = hashlib.md5(file.read()).hexdigest()
+                if file_hash not in get_file_hash(UPLOADED_FILES):
+                    filename = file.filename
+                    up_path = os.path.join(UPLOADED_FILES, filename)
+                    file.save(up_path)
             else:
                 return abort(HTTPStatus.BAD_REQUEST, description='invalid file type')
         return render_template('success.html')
