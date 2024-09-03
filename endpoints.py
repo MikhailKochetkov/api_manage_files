@@ -48,9 +48,9 @@ def create_file():
 def get_files():
     try:
         files = os.listdir(UPLOADED_FILES)
+        return jsonify(files)
     except FileNotFoundError:
         return jsonify({'error': 'directory not found'})
-    return jsonify(files)
 
 
 @route_prefix.route('/<ext>/<file_name>', methods=['GET'])
@@ -60,10 +60,8 @@ def get_file(ext, file_name):
 
 
 @route_prefix.route('/<ext>', methods=['GET'])
-def get_files_with_specified_extension(ext):
+def get_files_spec_ext(ext):
     files = [f for f in os.listdir(UPLOADED_FILES) if f.endswith(ext)]
-    if not files:
-        return jsonify({'error': 'files not found'})
     return jsonify(files)
 
 
@@ -71,8 +69,11 @@ def get_files_with_specified_extension(ext):
 def delete_file(file_name):
     file_path = os.path.join(UPLOADED_FILES, file_name)
     if os.path.exists(file_path):
-        os.remove(file_path)
-        return jsonify({"message": f"file '{file_name}' deleted successfully"})
+        try:
+            os.remove(file_path)
+            return jsonify({"message": f"file '{file_name}' deleted successfully"}), HTTPStatus.OK
+        except Exception as e:
+            return jsonify({"error": f"error deleting file '{file_name}': {str(e)}"}), HTTPStatus.INTERNAL_SERVER_ERROR
     else:
         return jsonify({"error": f"file '{file_name}' not found"}), HTTPStatus.NOT_FOUND
 

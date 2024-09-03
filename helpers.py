@@ -1,10 +1,10 @@
 import os
 import hashlib
 
-from settings import ALLOWED_EXTENSIONS
+from settings import NOT_ALLOWED_EXTENSIONS
 
 
-def get_file_hash(folder_path):
+def get_file_hash(folder_path: str) -> list[str]:
     files_hash = []
     for name in os.listdir(folder_path):
         file_path = os.path.join(folder_path, name)
@@ -17,6 +17,6 @@ def get_file_hash(folder_path):
     return files_hash
 
 
-def not_allowed_file_ext(filename):
+def not_allowed_file_ext(filename: str) -> bool:
     return (os.path.splitext(filename.lower())[1][1:]
-            not in ALLOWED_EXTENSIONS)
+            not in NOT_ALLOWED_EXTENSIONS)
