@@ -18,5 +18,5 @@ def get_file_hash(folder_path):
 
 
 def not_allowed_file_ext(filename):
-    return (os.path.splitext(filename)[1][1:]
-            not in [x.upper() for x in ALLOWED_EXTENSIONS])
+    return (os.path.splitext(filename.lower())[1][1:]
+            not in ALLOWED_EXTENSIONS)
