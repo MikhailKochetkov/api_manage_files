@@ -1,9 +1,10 @@
 import os
 import hashlib
-from flask import Flask, Blueprint, jsonify, render_template, request, abort
-from settings import UPLOADED_FILES, MAX_SiZE
-from http import HTTPStatus
 
+from http import HTTPStatus
+from flask import Flask, Blueprint, jsonify, render_template, request, abort
+
+from settings import UPLOADED_FILES, MAX_SiZE
 from helpers import not_allowed_file_ext, get_file_hash
 
 
