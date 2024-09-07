@@ -2,17 +2,26 @@ import os
 import hashlib
 
 from http import HTTPStatus
-from flask import Flask, Blueprint, jsonify, render_template, request, abort
+from flask import (Flask,
+                   Blueprint,
+                   jsonify,
+                   render_template,
+                   request,
+                   abort)
 
 from settings import UPLOADED_FILES, MAX_SiZE
 from helpers import not_allowed_file_ext, get_file_hash
-from decorators import check_dir_readable, check_dir_execuatble, check_dir_writable
+from decorators import (check_dir_readable,
+                        check_dir_execuatble,
+                        check_dir_writable)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOADED_FILES
 app.config['MAX_CONTENT_LENGTH'] = MAX_SiZE
 
-route_prefix = Blueprint('route_prefix', __name__, url_prefix='/api/v1/files')
+route_prefix = Blueprint('route_prefix',
+                         __name__,
+                         url_prefix='/api/v1/files')
 
 
 @route_prefix.route('/')
@@ -26,7 +35,10 @@ def create_file():
     if request.method == 'POST':
         up_files = request.files.getlist('file')
         if not up_files or all(file.filename == '' for file in up_files):
-            return abort(HTTPStatus.BAD_REQUEST, description='no file selected')
+            return abort(
+                HTTPStatus.BAD_REQUEST,
+                description='no file selected'
+            )
         for file in up_files:
             if file and not_allowed_file_ext(file.filename):
                 file_hash = hashlib.md5(file.read()).hexdigest()
@@ -40,9 +52,15 @@ def create_file():
                             HTTPStatus.INTERNAL_SERVER_ERROR,
                             description=f'error saving file: {str(e)}')
                 else:
-                    return abort(HTTPStatus.BAD_REQUEST, description='file already exists')
+                    return abort(
+                        HTTPStatus.BAD_REQUEST,
+                        description='file already exists'
+                    )
             else:
-                return abort(HTTPStatus.BAD_REQUEST, description='invalid file type')
+                return abort(
+                    HTTPStatus.BAD_REQUEST,
+                    description='invalid file type'
+                )
         return render_template('success.html')
 
 
@@ -60,7 +78,8 @@ def get_files():
 @check_dir_readable
 def get_file(ext, file_name):
     try:
-        file = [f for f in os.listdir(UPLOADED_FILES) if f.startswith(file_name) and f.endswith(ext)]
+        file = [f for f in os.listdir(UPLOADED_FILES)
+                if f.startswith(file_name) and f.endswith(ext)]
         return jsonify(file)
     except FileNotFoundError:
         return jsonify({'error': 'no such file or directory'})
@@ -83,11 +102,17 @@ def delete_file(file_name):
     if os.path.exists(file_path):
         try:
             os.remove(file_path)
-            return jsonify({"message": f"file '{file_name}' deleted successfully"}), HTTPStatus.OK
+            return jsonify(
+                {"message": f"file '{file_name}' deleted successfully"}
+            ), HTTPStatus.OK
         except Exception as e:
-            return jsonify({"error": f"error deleting file '{file_name}': {str(e)}"}), HTTPStatus.INTERNAL_SERVER_ERROR
+            return jsonify(
+                {"error": f"error deleting file '{file_name}': {str(e)}"}
+            ), HTTPStatus.INTERNAL_SERVER_ERROR
     else:
-        return jsonify({"error": f"file '{file_name}' not found"}), HTTPStatus.NOT_FOUND
+        return jsonify(
+            {"error": f"file '{file_name}' not found"}
+        ), HTTPStatus.NOT_FOUND
 
 
 app.register_blueprint(route_prefix)
