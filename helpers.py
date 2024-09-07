@@ -4,7 +4,7 @@ import hashlib
 from settings import NOT_ALLOWED_EXTENSIONS
 
 
-def get_file_hash(folder_path: str) -> list[str]:
+def get_uploaded_file_hash(folder_path: str) -> list[str]:
     files_hash = []
     for name in os.listdir(folder_path):
         file_path = os.path.join(folder_path, name)

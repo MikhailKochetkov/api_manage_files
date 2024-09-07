@@ -10,7 +10,7 @@ from flask import (Flask,
                    abort)
 
 from settings import UPLOADED_FILES, MAX_SiZE
-from helpers import not_allowed_file_ext, get_file_hash
+from helpers import not_allowed_file_ext, get_uploaded_file_hash
 from decorators import (check_dir_readable,
                         check_dir_executable,
                         check_dir_writable)
@@ -43,7 +43,7 @@ def create_file():
             if file and not_allowed_file_ext(file.filename):
                 file_hash = hashlib.md5(file.read()).hexdigest()
                 file.seek(0)
-                if file_hash not in get_file_hash(UPLOADED_FILES):
+                if file_hash not in get_uploaded_file_hash(UPLOADED_FILES):
                     up_path = os.path.join(UPLOADED_FILES, file.filename)
                     try:
                         file.save(up_path)
