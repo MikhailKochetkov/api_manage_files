@@ -11,19 +11,19 @@ def check_dir_readable(func):
             return func()
         else:
             return jsonify(
-                {'error': 'access to directory denied'}
+                {'error': 'read access to directory denied'}
             )
     readable_wrapper.__name__ = func.__name__
     return readable_wrapper
 
 
-def check_dir_execuatble(func):
+def check_dir_executable(func):
     def execuatble_wrapper():
         if os.access(UPLOADED_FILES, os.EX_OK):
             return func()
         else:
             return jsonify(
-                {'error': 'access to directory denied'}
+                {'error': 'execuate access to directory denied'}
             )
     execuatble_wrapper.__name__ = func.__name__
     return execuatble_wrapper
@@ -35,7 +35,7 @@ def check_dir_writable(func):
             return func()
         else:
             return jsonify(
-                {'error': 'access to directory denied'}
+                {'error': 'write access to directory denied'}
             )
     writable_wrapper.__name__ = func.__name__
     return writable_wrapper

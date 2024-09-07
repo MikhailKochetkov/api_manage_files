@@ -12,7 +12,7 @@ from flask import (Flask,
 from settings import UPLOADED_FILES, MAX_SiZE
 from helpers import not_allowed_file_ext, get_file_hash
 from decorators import (check_dir_readable,
-                        check_dir_execuatble,
+                        check_dir_executable,
                         check_dir_writable)
 
 app = Flask(__name__)
@@ -96,7 +96,7 @@ def get_files_spec_ext(ext):
 
 
 @route_prefix.route('/<file_name>', methods=['DELETE'])
-@check_dir_execuatble
+@check_dir_executable
 def delete_file(file_name):
     file_path = os.path.join(UPLOADED_FILES, file_name)
     if os.path.exists(file_path):
