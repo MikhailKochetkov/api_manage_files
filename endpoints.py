@@ -6,7 +6,7 @@ from flask import Flask, Blueprint, jsonify, render_template, request, abort
 
 from settings import UPLOADED_FILES, MAX_SiZE
 from helpers import not_allowed_file_ext, get_file_hash
-
+from decorators import check_dir_readable, check_dir_execuatble, check_dir_writable
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOADED_FILES
@@ -21,6 +21,7 @@ def show_upload_page():
 
 
 @route_prefix.route('/create', methods=['POST'])
+@check_dir_writable
 def create_file():
     if request.method == 'POST':
         up_files = request.files.getlist('file')
@@ -46,27 +47,37 @@ def create_file():
 
 
 @route_prefix.route('/list', methods=['GET'])
+@check_dir_readable
 def get_files():
     try:
         files = os.listdir(UPLOADED_FILES)
         return jsonify(files)
     except FileNotFoundError:
-        return jsonify({'error': 'directory not found'})
+        return jsonify({'error': 'no such directory'})
 
 
 @route_prefix.route('/<ext>/<file_name>', methods=['GET'])
+@check_dir_readable
 def get_file(ext, file_name):
-    file = [f for f in os.listdir(UPLOADED_FILES) if f.startswith(file_name) and f.endswith(ext)]
-    return jsonify(file)
+    try:
+        file = [f for f in os.listdir(UPLOADED_FILES) if f.startswith(file_name) and f.endswith(ext)]
+        return jsonify(file)
+    except FileNotFoundError:
+        return jsonify({'error': 'no such file or directory'})
 
 
 @route_prefix.route('/<ext>', methods=['GET'])
+@check_dir_readable
 def get_files_spec_ext(ext):
-    files = [f for f in os.listdir(UPLOADED_FILES) if f.endswith(ext)]
-    return jsonify(files)
+    try:
+        files = [f for f in os.listdir(UPLOADED_FILES) if f.endswith(ext)]
+        return jsonify(files)
+    except FileNotFoundError:
+        return jsonify({'error': 'no such file or directory'})
 
 
 @route_prefix.route('/<file_name>', methods=['DELETE'])
+@check_dir_execuatble
 def delete_file(file_name):
     file_path = os.path.join(UPLOADED_FILES, file_name)
     if os.path.exists(file_path):
@@ -80,7 +91,6 @@ def delete_file(file_name):
 
 
 app.register_blueprint(route_prefix)
-
 
 if __name__ == '__main__':
     from main import *
