@@ -7,9 +7,9 @@ up = os.getenv('UPLOADED_FILES', default='./uploads')
 
 
 def check_dir_readable(func):
-    def readable_wrapper():
+    def readable_wrapper(*args, **kwargs):
         if os.access(up, os.R_OK):
-            return func()
+            return func(*args, **kwargs)
         else:
             return jsonify(
                 {'error': 'read access to directory denied'}
@@ -19,9 +19,9 @@ def check_dir_readable(func):
 
 
 def check_dir_executable(func):
-    def execuatble_wrapper():
+    def execuatble_wrapper(*args, **kwargs):
         if os.access(up, os.EX_OK):
-            return func()
+            return func(*args, **kwargs)
         else:
             return jsonify(
                 {'error': 'execuate access to directory denied'}
