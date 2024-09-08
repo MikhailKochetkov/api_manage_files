@@ -22,5 +22,5 @@ def uploaded_file_hash(folder_path: str) -> list[str]:
 def not_allowed_file_ext(filename: str) -> bool:
     return (os.path.splitext(filename.lower())[1][1:]
             not in set(os.getenv(
-                'NOT_ALLOWED_EXTENSIONS').split(','))
+                'NOT_ALLOWED_EXTENSIONS', default='png,jpg,gif').split(','))
             )
