@@ -1,7 +1,9 @@
 import os
 import hashlib
 
-from settings import NOT_ALLOWED_EXTENSIONS
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def uploaded_file_hash(folder_path: str) -> list[str]:
@@ -19,4 +21,6 @@ def uploaded_file_hash(folder_path: str) -> list[str]:
 
 def not_allowed_file_ext(filename: str) -> bool:
     return (os.path.splitext(filename.lower())[1][1:]
-            not in NOT_ALLOWED_EXTENSIONS)
+            not in set(os.getenv(
+                'NOT_ALLOWED_EXTENSIONS').split(','))
+            )

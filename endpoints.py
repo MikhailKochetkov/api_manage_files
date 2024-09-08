@@ -9,15 +9,14 @@ from flask import (Flask,
                    request,
                    abort)
 
-from settings import UPLOADED_FILES, MAX_SiZE
 from helpers import not_allowed_file_ext, uploaded_file_hash
 from decorators import (check_dir_readable,
                         check_dir_executable,
                         check_dir_writable)
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOADED_FILES
-app.config['MAX_CONTENT_LENGTH'] = MAX_SiZE
+app.config['UPLOAD_FOLDER'] = os.getenv('UPLOADED_FILES', default='./uploads')
+app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_SiZE', default='16777216'))
 
 route_prefix = Blueprint('route_prefix',
                          __name__,
@@ -43,8 +42,8 @@ def create_file():
             if file and not_allowed_file_ext(file.filename):
                 file_hash = hashlib.md5(file.read()).hexdigest()
                 file.seek(0)
-                if file_hash not in uploaded_file_hash(UPLOADED_FILES):
-                    up_path = os.path.join(UPLOADED_FILES, file.filename)
+                if file_hash not in uploaded_file_hash(app.config['UPLOAD_FOLDER']):
+                    up_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                     try:
                         file.save(up_path)
                     except Exception as e:
@@ -68,7 +67,7 @@ def create_file():
 @check_dir_readable
 def get_files():
     try:
-        files = os.listdir(UPLOADED_FILES)
+        files = os.listdir(app.config['UPLOAD_FOLDER'])
         return jsonify(files)
     except FileNotFoundError:
         return jsonify({'error': 'no such directory'})
@@ -78,7 +77,7 @@ def get_files():
 @check_dir_readable
 def get_file(ext, file_name):
     try:
-        file = [f for f in os.listdir(UPLOADED_FILES)
+        file = [f for f in os.listdir(app.config['UPLOAD_FOLDER'])
                 if f.startswith(file_name) and f.endswith(ext)]
         return jsonify(file)
     except FileNotFoundError:
@@ -89,7 +88,7 @@ def get_file(ext, file_name):
 @check_dir_readable
 def get_files_spec_ext(ext):
     try:
-        files = [f for f in os.listdir(UPLOADED_FILES) if f.endswith(ext)]
+        files = [f for f in os.listdir(app.config['UPLOAD_FOLDER']) if f.endswith(ext)]
         return jsonify(files)
     except FileNotFoundError:
         return jsonify({'error': 'no such file or directory'})
@@ -98,7 +97,7 @@ def get_files_spec_ext(ext):
 @route_prefix.route('/<file_name>', methods=['DELETE'])
 @check_dir_executable
 def delete_file(file_name):
-    file_path = os.path.join(UPLOADED_FILES, file_name)
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
     if os.path.exists(file_path):
         try:
             os.remove(file_path)

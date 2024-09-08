@@ -2,12 +2,13 @@ import os
 
 from flask import jsonify
 
-from settings import UPLOADED_FILES
+
+up = os.getenv('UPLOADED_FILES', default='./uploads')
 
 
 def check_dir_readable(func):
     def readable_wrapper():
-        if os.access(UPLOADED_FILES, os.R_OK):
+        if os.access(up, os.R_OK):
             return func()
         else:
             return jsonify(
@@ -19,7 +20,7 @@ def check_dir_readable(func):
 
 def check_dir_executable(func):
     def execuatble_wrapper():
-        if os.access(UPLOADED_FILES, os.EX_OK):
+        if os.access(up, os.EX_OK):
             return func()
         else:
             return jsonify(
@@ -31,7 +32,7 @@ def check_dir_executable(func):
 
 def check_dir_writable(func):
     def writable_wrapper():
-        if os.access(UPLOADED_FILES, os.W_OK):
+        if os.access(up, os.W_OK):
             return func()
         else:
             return jsonify(
