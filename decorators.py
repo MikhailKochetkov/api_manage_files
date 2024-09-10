@@ -20,7 +20,7 @@ def check_dir_readable(func):
 
 def check_dir_executable(func):
     def execuatble_wrapper(*args, **kwargs):
-        if os.access(up, os.EX_OK):
+        if os.access(up, os.X_OK):
             return func(*args, **kwargs)
         else:
             return jsonify(
